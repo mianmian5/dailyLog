@@ -10,6 +10,7 @@ interface Repo {
 interface Props {
   repos: Repo[];
   loading: boolean;
+  username?: string;
 }
 
 const LANG_COLORS: Record<string, string> = {
@@ -25,7 +26,7 @@ const LANG_COLORS: Record<string, string> = {
   Shell: "#89e051",
 };
 
-export default function RepoList({ repos, loading }: Props) {
+export default function RepoList({ repos, loading, username = "mianmian5" }: Props) {
   if (loading) {
     return (
       <div className="bg-white rounded-xl p-4 md:p-5 border border-[var(--color-border)]">
@@ -42,13 +43,13 @@ export default function RepoList({ repos, loading }: Props) {
   return (
     <div className="bg-white rounded-xl p-4 md:p-5 border border-[var(--color-border)]">
       <h2 className="text-sm font-semibold text-[var(--color-text)] mb-3">
-        📦 仓库列表
+        📦 仓库列表 <span className="text-[var(--color-text-secondary)] font-normal">(@{username})</span>
       </h2>
       <div className="divide-y divide-[var(--color-border)]">
         {repos.map((repo) => (
           <a
             key={repo.name}
-            href={`https://github.com/mianmian5/${repo.name}`}
+            href={`https://github.com/${username}/${repo.name}`}
             target="_blank"
             className="block px-1 py-3 hover:bg-[var(--color-card-hover)] -mx-1 rounded-lg transition-colors"
           >

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { getGitHubUsername, getTrackedRepos } from "@/lib/config";
 
 interface CommitStats {
   total: number;
@@ -20,6 +21,19 @@ export default function ReportPanel({ scope, stats }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  function makeUrl(path: string, extra?: Record<string, string>): string {
+    const params = new URLSearchParams();
+    const username = getGitHubUsername();
+    const repos = getTrackedRepos();
+    if (username) params.set("username", username);
+    if (repos.length > 0) params.set("repos", repos.join(","));
+    if (extra) {
+      for (const [k, v] of Object.entries(extra)) params.set(k, v);
+    }
+    const qs = params.toString();
+    return api(`${path}${qs ? `?${qs}` : ""}`);
+  }
+
   async function generate() {
     setLoading(true);
     setError("");
@@ -29,8 +43,8 @@ export default function ReportPanel({ scope, stats }: Props) {
       const date = new Date().toISOString().slice(0, 10);
       const url =
         scope === "day"
-          ? api(`/api/report/daily?date=${date}`)
-          : api("/api/report/weekly");
+          ? makeUrl("/api/report/daily", { date })
+          : makeUrl("/api/report/weekly");
 
       const res = await fetch(url);
       if (!res.ok) throw new Error("生成失败");
@@ -91,10 +105,7 @@ export default function ReportPanel({ scope, stats }: Props) {
               }
               if (line.startsWith("- ")) {
                 return (
-                  <div
-                    key={i}
-                    className="text-[#475569] ml-2"
-                  >
+                  <div key={i} className="text-[#475569] ml-2">
                     {line}
                   </div>
                 );

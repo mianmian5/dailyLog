@@ -10,9 +10,6 @@ function getOctokit() {
   return octokit;
 }
 
-const USERNAME = process.env.GITHUB_USERNAME || "mianmian5";
-const TRACKED_REPOS = (process.env.TRACKED_REPOS || "").split(",").filter(Boolean);
-
 export interface Commit {
   sha: string;
   message: string;
@@ -30,13 +27,16 @@ export interface RepoStats {
   pushedAt: string;
 }
 
-export async function getUserRepos(): Promise<RepoStats[]> {
+export async function getUserRepos(
+  username?: string
+): Promise<RepoStats[]> {
+  const user = username || process.env.GITHUB_USERNAME || "mianmian5";
   const octo = getOctokit();
   const repos: RepoStats[] = [];
   let page = 1;
   while (true) {
     const { data } = await octo.rest.repos.listForUser({
-      username: USERNAME,
+      username: user,
       per_page: 100,
       page,
       sort: "updated",
@@ -59,17 +59,33 @@ export async function getUserRepos(): Promise<RepoStats[]> {
   return repos;
 }
 
-export async function getCommits(since: string, until: string): Promise<Commit[]> {
+export async function getCommits(
+  since: string,
+  until: string,
+  username?: string,
+  trackedRepos?: string[]
+): Promise<Commit[]> {
+  const user = username || process.env.GITHUB_USERNAME || "mianmian5";
+  const defaultRepos = (process.env.TRACKED_REPOS || "")
+    .split(",")
+    .filter(Boolean);
+  const repos = trackedRepos && trackedRepos.length > 0 ? trackedRepos : defaultRepos;
   const octo = getOctokit();
   const allCommits: Commit[] = [];
-  const repos = TRACKED_REPOS.length > 0 ? TRACKED_REPOS : await getRepoNames();
 
-  for (const repo of repos) {
+  // If no repos specified, fetch all user repos first
+  let targetRepos = repos;
+  if (targetRepos.length === 0) {
+    const allRepos = await getUserRepos(user);
+    targetRepos = allRepos.map((r) => r.name);
+  }
+
+  for (const repo of targetRepos) {
     try {
       let page = 1;
       while (true) {
         const { data } = await octo.rest.repos.listCommits({
-          owner: USERNAME,
+          owner: user,
           repo,
           since,
           until,
@@ -97,13 +113,13 @@ export async function getCommits(since: string, until: string): Promise<Commit[]
   return allCommits.sort((a, b) => b.date.localeCompare(a.date));
 }
 
-async function getRepoNames(): Promise<string[]> {
-  const repos = await getUserRepos();
-  return repos.map((r) => r.name);
-}
-
-export async function getCommitStats(since: string, until: string) {
-  const commits = await getCommits(since, until);
+export async function getCommitStats(
+  since: string,
+  until: string,
+  username?: string,
+  trackedRepos?: string[]
+) {
+  const commits = await getCommits(since, until, username, trackedRepos);
   const repoMap = new Map<string, number>();
   const dateMap = new Map<string, number>();
 

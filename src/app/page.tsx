@@ -6,6 +6,7 @@ import CommitActivity from "@/components/dashboard/commit-activity";
 import RepoList from "@/components/dashboard/repo-list";
 import ReportPanel from "@/components/dashboard/report-panel";
 import { api } from "@/lib/api";
+import { getGitHubUsername, getTrackedRepos } from "@/lib/config";
 
 interface CommitData {
   total: number;
@@ -29,10 +30,27 @@ export default function Dashboard() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [userLabel, setUserLabel] = useState("");
+
+  function makeUrl(path: string, extra?: Record<string, string>): string {
+    const params = new URLSearchParams();
+    const username = getGitHubUsername();
+    const repos = getTrackedRepos();
+    if (username) params.set("username", username);
+    if (repos.length > 0) params.set("repos", repos.join(","));
+    if (extra) {
+      for (const [k, v] of Object.entries(extra)) params.set(k, v);
+    }
+    const qs = params.toString();
+    return api(`${path}${qs ? `?${qs}` : ""}`);
+  }
 
   async function fetchData() {
     setLoading(true);
     setError("");
+    const username = getGitHubUsername();
+    setUserLabel(username);
+
     try {
       const now = new Date();
       const since = new Date(now);
@@ -40,11 +58,13 @@ export default function Dashboard() {
 
       const [commitsRes, reposRes] = await Promise.all([
         fetch(
-          api(
-            `/api/github/commits?scope=stats&since=${since.toISOString()}&until=${now.toISOString()}`
-          )
+          makeUrl("/api/github/commits", {
+            scope: "stats",
+            since: since.toISOString(),
+            until: now.toISOString(),
+          })
         ),
-        fetch(api("/api/github/commits?scope=repos")),
+        fetch(makeUrl("/api/github/commits", { scope: "repos" })),
       ]);
       if (!commitsRes.ok || !reposRes.ok) throw new Error("请求失败");
       setCommits(await commitsRes.json());
@@ -71,8 +91,13 @@ export default function Dashboard() {
           <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)]">
             仪表盘
           </h1>
-          <p className="text-[var(--color-text-muted)] text-sm mt-0.5">
-            GitHub 开发活动一览
+          <p className="text-[var(--color-text-muted)] text-sm mt-0.5 flex items-center gap-1.5">
+            <span>GitHub 开发活动一览</span>
+            {userLabel && (
+              <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+                @{userLabel}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex gap-2">
@@ -104,7 +129,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Stats Cards — 2 cols on mobile, 4 on desktop */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatsCard
           label="提交次数"
@@ -128,7 +153,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Activity + Report — stacked on mobile, side-by-side on desktop */}
+      {/* Activity + Report */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <CommitActivity
           data={commits?.dailyActivity || []}
@@ -150,7 +175,7 @@ export default function Dashboard() {
       </div>
 
       {/* Repo List */}
-      <RepoList repos={repos} loading={loading} />
+      <RepoList repos={repos} loading={loading} username={getGitHubUsername()} />
     </div>
   );
 }

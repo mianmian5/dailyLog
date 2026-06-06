@@ -5,6 +5,7 @@ import StatsCard from "@/components/dashboard/stats-card";
 import CommitActivity from "@/components/dashboard/commit-activity";
 import RepoList from "@/components/dashboard/repo-list";
 import ReportPanel from "@/components/dashboard/report-panel";
+import { api } from "@/lib/api";
 
 interface CommitData {
   total: number;
@@ -39,9 +40,9 @@ export default function Dashboard() {
 
       const [commitsRes, reposRes] = await Promise.all([
         fetch(
-          `/api/github/commits?scope=stats&since=${since.toISOString()}&until=${now.toISOString()}`
+          api(`/api/github/commits?scope=stats&since=${since.toISOString()}&until=${now.toISOString()}`)
         ),
-        fetch(`/api/github/commits?scope=repos`),
+        fetch(api(`/api/github/commits?scope=repos`)),
       ]);
       if (!commitsRes.ok || !reposRes.ok) throw new Error("请求失败");
       setCommits(await commitsRes.json());

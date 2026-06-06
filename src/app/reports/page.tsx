@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 interface Report {
   id: string;
@@ -17,7 +18,7 @@ export default function ReportsPage() {
   const [selected, setSelected] = useState<Report | null>(null);
 
   useEffect(() => {
-    fetch("/api/reports")
+    fetch(api("/api/reports"))
       .then((r) => r.json())
       .then((d) => setReports(d.reports || []))
       .catch(() => {})

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/lib/api";
 
 interface CommitStats {
   total: number;
@@ -28,8 +29,8 @@ export default function ReportPanel({ scope, stats }: Props) {
       const date = new Date().toISOString().slice(0, 10);
       const url =
         scope === "day"
-          ? `/api/report/daily?date=${date}`
-          : `/api/report/weekly`;
+          ? api(`/api/report/daily?date=${date}`)
+          : api(`/api/report/weekly`);
 
       const res = await fetch(url);
       if (!res.ok) throw new Error("生成失败");

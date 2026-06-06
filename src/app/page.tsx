@@ -40,9 +40,11 @@ export default function Dashboard() {
 
       const [commitsRes, reposRes] = await Promise.all([
         fetch(
-          api(`/api/github/commits?scope=stats&since=${since.toISOString()}&until=${now.toISOString()}`)
+          api(
+            `/api/github/commits?scope=stats&since=${since.toISOString()}&until=${now.toISOString()}`
+          )
         ),
-        fetch(api(`/api/github/commits?scope=repos`)),
+        fetch(api("/api/github/commits?scope=repos")),
       ]);
       if (!commitsRes.ok || !reposRes.ok) throw new Error("请求失败");
       setCommits(await commitsRes.json());
@@ -62,56 +64,51 @@ export default function Dashboard() {
   const totalForks = repos.reduce((s, r) => s + r.forks, 0);
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-5 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">仪表盘</h1>
-          <p className="text-[#94a3b8] text-sm mt-1">
+          <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)]">
+            仪表盘
+          </h1>
+          <p className="text-[var(--color-text-muted)] text-sm mt-0.5">
             GitHub 开发活动一览
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={() => setScope("day")}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              scope === "day"
-                ? "bg-indigo-600 text-white"
-                : "bg-[#1a1a2e] text-[#94a3b8] hover:text-white"
-            }`}
-          >
-            今日
-          </button>
-          <button
-            onClick={() => setScope("week")}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              scope === "week"
-                ? "bg-indigo-600 text-white"
-                : "bg-[#1a1a2e] text-[#94a3b8] hover:text-white"
-            }`}
-          >
-            本周
-          </button>
+          {(["day", "week"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setScope(s)}
+              className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                scope === s
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-white text-[var(--color-text-muted)] border border-[var(--color-border)] hover:border-indigo-300 hover:text-indigo-600"
+              }`}
+            >
+              {s === "day" ? "今日" : "本周"}
+            </button>
+          ))}
           <button
             onClick={fetchData}
-            className="px-4 py-1.5 rounded-lg text-sm bg-[#1a1a2e] text-[#94a3b8] hover:text-white transition-colors"
+            className="px-3.5 py-1.5 rounded-lg text-sm bg-white text-[var(--color-text-muted)] border border-[var(--color-border)] hover:border-indigo-300 hover:text-indigo-600 transition-colors"
           >
-            🔄 刷新
+            🔄
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-900/30 border border-red-800 text-red-300 rounded-lg p-4 text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
           {error}
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* Stats Cards — 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatsCard
           label="提交次数"
-          value={loading ? "..." : String(commits?.total ?? 0)}
+          value={loading ? "…" : String(commits?.total ?? 0)}
           icon="📝"
         />
         <StatsCard
@@ -131,14 +128,12 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Commit Activity */}
+      {/* Activity + Report — stacked on mobile, side-by-side on desktop */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <CommitActivity
           data={commits?.dailyActivity || []}
           loading={loading}
         />
-
-        {/* AI Report */}
         <ReportPanel
           scope={scope}
           stats={

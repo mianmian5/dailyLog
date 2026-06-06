@@ -28,47 +28,55 @@ const LANG_COLORS: Record<string, string> = {
 export default function RepoList({ repos, loading }: Props) {
   if (loading) {
     return (
-      <div className="bg-[#1a1a2e] rounded-xl p-5 border border-[#2d2d4a]">
-        <h2 className="text-sm font-semibold text-white mb-4">📦 仓库列表</h2>
-        <div className="text-[#94a3b8] text-sm">加载中...</div>
+      <div className="bg-white rounded-xl p-4 md:p-5 border border-[var(--color-border)]">
+        <h2 className="text-sm font-semibold text-[var(--color-text)] mb-3">
+          📦 仓库列表
+        </h2>
+        <div className="text-[var(--color-text-secondary)] text-sm">
+          加载中…
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#1a1a2e] rounded-xl p-5 border border-[#2d2d4a]">
-      <h2 className="text-sm font-semibold text-white mb-4">📦 仓库列表</h2>
-      <div className="space-y-2">
+    <div className="bg-white rounded-xl p-4 md:p-5 border border-[var(--color-border)]">
+      <h2 className="text-sm font-semibold text-[var(--color-text)] mb-3">
+        📦 仓库列表
+      </h2>
+      <div className="divide-y divide-[var(--color-border)]">
         {repos.map((repo) => (
           <a
             key={repo.name}
             href={`https://github.com/mianmian5/${repo.name}`}
             target="_blank"
-            className="block px-4 py-3 rounded-lg hover:bg-[#1f1f3a] transition-colors"
+            className="block px-1 py-3 hover:bg-[var(--color-card-hover)] -mx-1 rounded-lg transition-colors"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-white">{repo.name}</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-medium text-sm text-[var(--color-text)] truncate">
+                  {repo.name}
+                </span>
                 {repo.language && (
-                  <span className="text-xs flex items-center gap-1.5 text-[#94a3b8]">
+                  <span className="text-xs flex items-center gap-1 text-[var(--color-text-muted)] shrink-0">
                     <span
-                      className="w-2.5 h-2.5 rounded-full inline-block"
+                      className="w-2 h-2 rounded-full inline-block"
                       style={{
                         backgroundColor:
-                          LANG_COLORS[repo.language] || "#8b8b8b",
+                          LANG_COLORS[repo.language] || "#94a3b8",
                       }}
                     />
                     {repo.language}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-xs text-[#94a3b8]">
+              <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] shrink-0">
                 <span>⭐ {repo.stars}</span>
-                <span>🍴 {repo.forks}</span>
+                <span className="hidden sm:inline">🍴 {repo.forks}</span>
               </div>
             </div>
             {repo.description && (
-              <p className="text-xs text-[#64748b] mt-1 line-clamp-1">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1 line-clamp-1">
                 {repo.description}
               </p>
             )}

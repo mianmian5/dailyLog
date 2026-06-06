@@ -8,12 +8,14 @@ export default function StatsCard({
   icon: string;
 }) {
   return (
-    <div className="bg-[#1a1a2e] rounded-xl p-4 border border-[#2d2d4a]">
-      <div className="flex items-center gap-2 text-[#94a3b8] text-sm mb-2">
+    <div className="bg-white rounded-xl p-3.5 md:p-4 border border-[var(--color-border)]">
+      <div className="flex items-center gap-1.5 text-[var(--color-text-muted)] text-xs md:text-sm mb-1.5">
         <span>{icon}</span>
         <span>{label}</span>
       </div>
-      <div className="text-2xl font-bold text-white">{value}</div>
+      <div className="text-xl md:text-2xl font-bold text-[var(--color-text)]">
+        {value}
+      </div>
     </div>
   );
 }

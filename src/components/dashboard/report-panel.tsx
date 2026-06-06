@@ -30,7 +30,7 @@ export default function ReportPanel({ scope, stats }: Props) {
       const url =
         scope === "day"
           ? api(`/api/report/daily?date=${date}`)
-          : api(`/api/report/weekly`);
+          : api("/api/report/weekly");
 
       const res = await fetch(url);
       if (!res.ok) throw new Error("生成失败");
@@ -44,58 +44,64 @@ export default function ReportPanel({ scope, stats }: Props) {
   }
 
   return (
-    <div className="bg-[#1a1a2e] rounded-xl p-5 border border-[#2d2d4a] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-white">
+    <div className="bg-white rounded-xl p-4 md:p-5 border border-[var(--color-border)] flex flex-col min-h-[300px]">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-[var(--color-text)]">
           🤖 AI {scope === "day" ? "日报" : "周报"}
         </h2>
         <button
           onClick={generate}
           disabled={loading}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
-          {loading ? "生成中..." : "🪄 生成"}
+          {loading ? "生成中…" : "🪄 生成"}
         </button>
       </div>
 
       {!stats ? (
-        <div className="flex-1 flex items-center justify-center text-[#475569] text-xs">
-          暂无数据，请先刷新页面
+        <div className="flex-1 flex items-center justify-center text-[var(--color-text-secondary)] text-xs">
+          暂无数据，请先刷新
         </div>
       ) : stats.total === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-[#475569] text-xs">
+        <div className="flex-1 flex items-center justify-center text-[var(--color-text-secondary)] text-xs">
           {scope === "day" ? "今天还没有提交记录" : "本周还没有提交记录"}
         </div>
       ) : !report ? (
-        <div className="flex-1 flex items-center justify-center text-[#475569] text-xs">
+        <div className="flex-1 flex items-center justify-center text-[var(--color-text-secondary)] text-xs">
           {error ? (
-            <span className="text-red-400">{error}</span>
+            <span className="text-red-500">{error}</span>
           ) : (
-            <span>点击「生成」按钮，AI 会根据提交记录生成报告</span>
+            <span>点击「生成」按钮生成 AI 报告</span>
           )}
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto max-h-[400px] pr-1 space-y-1">
-          <div className="report-content text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="flex-1 overflow-y-auto max-h-[420px] pr-1">
+          <div className="report-content text-sm whitespace-pre-wrap">
             {report.split("\n").map((line, i) => {
               if (line.startsWith("#")) return null;
               if (line.match(/^\d+\. \*\*/)) {
                 return (
-                  <div key={i} className="mt-3 mb-1 font-semibold text-white">
+                  <div
+                    key={i}
+                    className="mt-2.5 mb-1 font-semibold text-[var(--color-text)]"
+                  >
                     {line.replace(/\*\*/g, "")}
                   </div>
                 );
               }
               if (line.startsWith("- ")) {
                 return (
-                  <div key={i} className="text-[#cbd5e1] ml-2">
+                  <div
+                    key={i}
+                    className="text-[#475569] ml-2"
+                  >
                     {line}
                   </div>
                 );
               }
               if (line.trim() === "") return <div key={i} className="h-1" />;
               return (
-                <div key={i} className="text-[#94a3b8]">
+                <div key={i} className="text-[var(--color-text-muted)]">
                   {line}
                 </div>
               );

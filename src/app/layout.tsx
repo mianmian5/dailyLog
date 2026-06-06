@@ -20,13 +20,13 @@ export default function RootLayout({
             <div className="text-xl font-bold mb-8 text-indigo-400">
               📊 DailyLog
             </div>
-            <SidebarLink href="/" icon="🏠">
+            <SidebarLink href="/dailylog/" icon="🏠">
               仪表盘
             </SidebarLink>
-            <SidebarLink href="/reports" icon="📝">
+            <SidebarLink href="/dailylog/reports" icon="📝">
               报告列表
             </SidebarLink>
-            <SidebarLink href="/settings" icon="⚙️">
+            <SidebarLink href="/dailylog/settings" icon="⚙️">
               设置
             </SidebarLink>
           </nav>

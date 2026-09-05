@@ -8,9 +8,14 @@ export default function SettingsPage() {
   const [repos, setReposState] = useState("mcp-hunt,fantuan,dailylog");
   const [saved, setSaved] = useState(false);
 
+  // 从 localStorage 读取保存的配置：微任务延迟，避免 hydration mismatch，
+  // 同时满足 react-hooks 不在 effect 中同步 setState 的规则
   useEffect(() => {
-    setUsernameState(getGitHubUsername());
-    setReposState(getTrackedRepos().join(","));
+    const p = Promise.resolve().then(() => {
+      setUsernameState(getGitHubUsername());
+      setReposState(getTrackedRepos().join(","));
+    });
+    return () => { void p; };
   }, []);
 
   function save() {

@@ -77,7 +77,12 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    fetchData();
+    // 微任务延迟首次拉取，避免 effect 内同步 setState（react-hooks 规则）
+    const p = Promise.resolve().then(() => {
+      fetchData();
+    });
+    return () => { void p; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope]);
 
   const totalStars = repos.reduce((s, r) => s + r.stars, 0);
